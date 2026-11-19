@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Tarea1</title>
+</head>
+<body>
+
+  <table border="1"> 
+    <tr>
+      <th>Nombre</th>
+      <th>Foto</th>
+    </tr>
+    <tr>
+      <td>Sebastián</td>
+      <td><img src="https://github.com/Sebastian123xd/Sebastian123xd.github.io/blob/main/fotos%20equipo7/sebastian.jpeg?raw=true" alt="Foto de Sebastián" width="100"></td>
+    </tr>
+    <tr> 
+      <td>Iris</td>
+      <td><img src="https://github.com/Sebastian123xd/Sebastian123xd.github.io/blob/main/fotos%20equipo7/iris.jpeg?raw=true" alt="Foto de Iris" width="100"></td>
+    </tr>
+     <tr>
+      <td>Ingrid</td>
+      <td><img src="https://github.com/Sebastian123xd/Sebastian123xd.github.io/blob/main/fotos%20equipo7/ingrid.jpeg?raw=true" alt="Foto de Ingrid" width="100"></td>
+    </tr>
+     <tr>
+     <td>Daniela</td>
+      <td><img src="https://github.com/Sebastian123xd/Sebastian123xd.github.io/blob/main/fotos%20equipo7/daniela.png?raw=true" alt="Foto de Daniela" width="100"></td>
+    </tr>
+  </table>
+</body>
+</html>
