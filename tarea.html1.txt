@@ -1,31 +1,55 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Tarea1</title>
+<meta charset="UTF-8">
+<title>Tarea1</title>
 </head>
 <body>
-
-  <table border="1"> 
+  <table border="5"> 
     <tr>
-      <th>Nombre</th>
       <th>Foto</th>
+      <th>Nombre</th>
+      <th>ID empleado</th>
+       <th>Departamento</th>
+       <th>Fecha de Ingreso</th>
+       <th>Salario Bruto Mensual</th>
+       <th>Correo Corporativo</th>
     </tr>
     <tr>
-      <td>Sebastián</td>
-      <td><img src="https://github.com/Sebastian123xd/Sebastian123xd.github.io/blob/main/fotos%20equipo7/sebastian.jpeg?raw=true" alt="Foto de Sebastián" width="100"></td>
+            <td><img src="https://github.com/Sebastian123xd/Sebastian123xd.github.io/blob/main/fotos%20equipo7/sebastian.jpeg?raw=true" alt="Foto de Sebastián" width="150"></td>
+      <td>Sebastian Gutierrez Ramos</td>
+        <th>EMP-001</th>
+        <th>TI / Sistemas</th>
+        <th>15/01/2025</th>
+        <th>$18,000</th>
+         <th>sebastian@empresa.com</th> 
     </tr>
     <tr> 
-      <td>Iris</td>
-      <td><img src="https://github.com/Sebastian123xd/Sebastian123xd.github.io/blob/main/fotos%20equipo7/iris.jpeg?raw=true" alt="Foto de Iris" width="100"></td>
+      <td><img src="https://github.com/Sebastian123xd/Sebastian123xd.github.io/blob/main/fotos%20equipo7/iris.jpeg?raw=true" alt="Foto de Iris" width="150"></td>
+      <td>Iris Blanca Lopez Juarez</td>
+      <th>EMP-002</th>
+              <th>Ventas</th>
+              <th>15/01/2025</th>
+              <th>$24,500</th>
+              <th>iris@empresa.com</th>
     </tr>
      <tr>
-      <td>Ingrid</td>
-      <td><img src="https://github.com/Sebastian123xd/Sebastian123xd.github.io/blob/main/fotos%20equipo7/ingrid.jpeg?raw=true" alt="Foto de Ingrid" width="100"></td>
+            <td><img src="https://github.com/Sebastian123xd/Sebastian123xd.github.io/blob/main/fotos%20equipo7/ingrid.jpeg?raw=true" alt="Foto de Ingrid" width="150"></td>
+      <td>Ingrid Cen Oy</td>
+      <th>EMP-003</th>
+       <th>Operaciones</th>
+               <th>15/01/2025</th>
+               <th>$15,000</th>
+               <th>ingrid@empresa.com</th>
     </tr>
      <tr>
-     <td>Daniela</td>
-      <td><img src="https://github.com/Sebastian123xd/Sebastian123xd.github.io/blob/main/fotos%20equipo7/daniela.png?raw=true" alt="Foto de Daniela" width="100"></td>
+      <td><img src="https://github.com/Sebastian123xd/Sebastian123xd.github.io/blob/main/fotos%20equipo7/daniela.png?raw=true" alt="Foto de Daniela" width="150"></td>
+     <td>Daniela Farias Perez</td>
+     <th>EMP-004</th>
+     <th>Administración</th>
+             <th>15/01/2025</th>
+             <th>$21,000</th>
+             <th>daniela@empresa.com</th>   
     </tr>
   </table>
 </body>
