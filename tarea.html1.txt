@@ -1,56 +1,1592 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Tarea1</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CYBER ROOFTOP RUNNER // CHILL NIGHT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['Space Grotesk', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        twilight: '#0b0e1a',
+                        slateNight: '#13192b',
+                        pastelCyan: '#7dd3fc',
+                        lavender: '#c4b5fd',
+                        warmAmber: '#fcd34d'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Estilos base y prevención de rebote/scroll en dispositivos táctiles */
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0b0e1a;
+            touch-action: none;
+        }
+
+        #game-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Animación suave de flotación para tarjetas */
+        @keyframes gentleFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+
+        .float-card {
+            animation: gentleFloat 4.5s ease-in-out infinite;
+        }
+
+        /* Resplandor tenue pastel */
+        .chill-glow {
+            box-shadow: 0 12px 40px rgba(8, 12, 26, 0.75), 0 0 28px rgba(196, 181, 253, 0.14);
+        }
+    </style>
 </head>
-<body>
-  <table border="5"> 
-    <tr>
-      <th>Foto</th>
-      <th>Nombre</th>
-      <th>ID empleado</th>
-       <th>Departamento</th>
-       <th>Fecha de Ingreso</th>
-       <th>Salario Bruto Mensual</th>
-       <th>Correo Corporativo</th>
-    </tr>
-    <tr>
-            <td><img src="https://github.com/Sebastian123xd/Sebastian123xd.github.io/blob/main/fotos%20equipo7/sebastian.jpeg?raw=true" alt="Foto de Sebastián" width="150"></td>
-      <td>Sebastian Gutierrez Ramos</td>
-        <th>EMP-001</th>
-        <th>TI / Sistemas</th>
-        <th>15/01/2025</th>
-        <th>$18,000</th>
-         <th>sebastian@empresa.com</th> 
-    </tr>
-    <tr> 
-      <td><img src="https://github.com/Sebastian123xd/Sebastian123xd.github.io/blob/main/fotos%20equipo7/iris.jpeg?raw=true" alt="Foto de Iris" width="150"></td>
-      <td>Iris Blanca Lopez Juarez</td>
-      <th>EMP-002</th>
-              <th>Ventas</th>
-              <th>15/01/2025</th>
-              <th>$24,500</th>
-              <th>iris@empresa.com</th>
-    </tr>
-     <tr>
-            <td><img src="https://github.com/Sebastian123xd/Sebastian123xd.github.io/blob/main/fotos%20equipo7/ingrid.jpeg?raw=true" alt="Foto de Ingrid" width="150"></td>
-      <td>Ingrid Cen Oy</td>
-      <th>EMP-003</th>
-       <th>Operaciones</th>
-               <th>15/01/2025</th>
-               <th>$15,000</th>
-               <th>ingrid@empresa.com</th>
-    </tr>
-     <tr>
-      <td><img src="https://github.com/Sebastian123xd/Sebastian123xd.github.io/blob/main/fotos%20equipo7/daniela.png?raw=true" alt="Foto de Daniela" width="150"></td>
-     <td>Daniela Farias Perez</td>
-     <th>EMP-004</th>
-     <th>Administración</th>
-             <th>15/01/2025</th>
-             <th>$21,000</th>
-             <th>daniela@empresa.com</th>   
-    </tr>
-  </table>
+<body class="font-sans text-slate-100 antialiased">
+
+    <!-- Lienzo principal 2D a pantalla completa -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Notificación flotante minimalista (sin alert) -->
+    <div id="toast-container" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 pointer-events-none"></div>
+
+    <!-- HUD Superior Minimalista -->
+    <header class="fixed top-0 left-0 right-0 z-30 px-4 sm:px-6 py-4 flex items-start justify-between gap-3 pointer-events-none">
+        
+        <!-- Métricas principales: Distancia, Puntos y Récord -->
+        <div class="flex flex-wrap items-center gap-2.5 sm:gap-4 pointer-events-auto">
+            <div class="px-3.5 py-2 rounded-2xl bg-[#111629]/75 backdrop-blur-md border border-white/10">
+                <div class="text-[10px] uppercase tracking-[0.2em] text-slate-400">Distancia</div>
+                <div id="hud-distance" class="font-display font-bold text-base sm:text-lg text-pastelCyan">0 m</div>
+            </div>
+
+            <div class="px-3.5 py-2 rounded-2xl bg-[#111629]/75 backdrop-blur-md border border-white/10">
+                <div class="text-[10px] uppercase tracking-[0.2em] text-slate-400">Puntos</div>
+                <div class="flex items-baseline gap-2">
+                    <span id="hud-score" class="font-display font-bold text-base sm:text-lg text-white">0</span>
+                    <span id="hud-combo" class="text-xs font-semibold text-lavender hidden">x1</span>
+                </div>
+            </div>
+
+            <div class="hidden sm:block px-3.5 py-2 rounded-2xl bg-[#111629]/75 backdrop-blur-md border border-white/10">
+                <div class="text-[10px] uppercase tracking-[0.2em] text-slate-400">Récord</div>
+                <div id="hud-best" class="font-display font-bold text-base sm:text-lg text-warmAmber">0</div>
+            </div>
+        </div>
+
+        <!-- Barra central/derecha de Medidor Astral Flow + Controles de Audio -->
+        <div class="flex items-center gap-2 sm:gap-3 pointer-events-auto">
+            
+            <!-- Medidor de Astral Flow -->
+            <div class="px-3.5 py-2 rounded-2xl bg-[#111629]/75 backdrop-blur-md border border-white/10 min-w-[125px] sm:min-w-[170px]">
+                <div class="flex items-center justify-between text-[10px] uppercase tracking-[0.18em] mb-1">
+                    <span id="flow-label" class="text-lavender font-semibold">Astral Flow</span>
+                    <span id="flow-pct" class="text-slate-300 font-display">0%</span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+                    <div id="flow-bar" class="h-full w-0 rounded-full bg-gradient-to-r from-pastelCyan via-lavender to-warmAmber transition-all duration-150"></div>
+                </div>
+            </div>
+
+            <!-- Botón cargar MP3 propio -->
+            <label for="chill-mp3-input" title="Cargar tu propia música MP3" class="p-2.5 sm:px-3.5 sm:py-2.5 rounded-2xl bg-[#111629]/80 hover:bg-[#1a223d] backdrop-blur-md border border-white/10 text-xs font-medium text-slate-200 cursor-pointer transition-all flex items-center gap-2">
+                <svg class="w-4 h-4 text-lavender shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+                </svg>
+                <span class="hidden md:inline">MP3</span>
+            </label>
+            <input id="chill-mp3-input" type="file" accept="audio/*,.mp3,.wav,.ogg" class="hidden" onchange="handleCustomAudio(event)">
+            <audio id="custom-audio-player" loop class="hidden"></audio>
+
+            <!-- Botón Mute / Unmute Audio -->
+            <button id="mute-btn" onclick="toggleAudioMute()" title="Silenciar / Activar sonido" class="p-2.5 rounded-2xl bg-[#111629]/80 hover:bg-[#1a223d] backdrop-blur-md border border-white/10 text-slate-200 transition-all">
+                <svg id="icon-sound-on" class="w-5 h-5 text-pastelCyan" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                </svg>
+                <svg id="icon-sound-off" class="w-5 h-5 text-slate-500 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Controles táctiles discretos en la esquina inferior para móvil/tablet -->
+    <div id="mobile-touch-bar" class="fixed bottom-4 left-4 right-4 z-20 flex sm:hidden items-center justify-between gap-3 pointer-events-none opacity-80">
+        <button id="btn-touch-slide" class="pointer-events-auto flex-1 py-3.5 rounded-2xl bg-[#111629]/75 backdrop-blur-md border border-white/10 text-xs font-semibold uppercase tracking-widest text-lavender active:bg-lavender/20">
+            ↓ Deslizar
+        </button>
+        <button id="btn-touch-jump" class="pointer-events-auto flex-1 py-3.5 rounded-2xl bg-[#111629]/75 backdrop-blur-md border border-white/10 text-xs font-semibold uppercase tracking-widest text-pastelCyan active:bg-pastelCyan/20">
+            ↑ Saltar (x2)
+        </button>
+    </div>
+
+    <!-- Pantalla de Inicio (Start Overlay) -->
+    <div id="start-overlay" class="fixed inset-0 z-40 flex items-center justify-center p-4 bg-[#080b16]/65 backdrop-blur-sm transition-opacity duration-300">
+        <div class="float-card w-full max-w-md rounded-3xl bg-[#101528]/90 border border-white/15 p-6 sm:p-8 chill-glow text-center space-y-6">
+            <div class="space-y-2">
+                <span class="inline-block px-3 py-1 rounded-full bg-lavender/15 border border-lavender/30 text-[11px] font-semibold uppercase tracking-[0.22em] text-lavender">
+                    Lo-Fi Nocturnal Parkour
+                </span>
+                <h1 class="font-display font-bold text-2xl sm:text-3xl tracking-tight text-white">
+                    CYBER ROOFTOP RUNNER
+                </h1>
+                <p class="text-xs sm:text-sm uppercase tracking-[0.28em] text-pastelCyan/90 font-medium">
+                    // CHILL NIGHT
+                </p>
+            </div>
+
+            <p class="text-sm text-slate-300 leading-relaxed">
+                Corre sobre azoteas iluminadas bajo la lluvia nocturna. Encadena saltos en los bordes y reúne <span class="text-lavender font-medium">Orbes Zen</span> para activar <span class="text-pastelCyan font-medium">Astral Flow</span>.
+            </p>
+
+            <!-- Guía rápida de controles -->
+            <div class="grid grid-cols-2 gap-2.5 text-left text-xs">
+                <div class="p-3 rounded-2xl bg-white/[0.04] border border-white/10">
+                    <div class="font-semibold text-pastelCyan mb-0.5">Saltar / Doble Salto</div>
+                    <div class="text-slate-400">W / ↑ / Espacio / Toque</div>
+                </div>
+                <div class="p-3 rounded-2xl bg-white/[0.04] border border-white/10">
+                    <div class="font-semibold text-lavender mb-0.5">Deslizar / Impulso Aire</div>
+                    <div class="text-slate-400">S / ↓ / Deslizar abajo</div>
+                </div>
+            </div>
+
+            <button id="start-btn" onclick="startGame()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-pastelCyan via-lavender to-indigo-300 hover:brightness-105 active:scale-[0.99] text-[#090d1a] font-display font-bold text-base uppercase tracking-[0.18em] shadow-[0_0_25px_rgba(125,211,252,0.35)] transition-all">
+                Jugar
+            </button>
+        </div>
+    </div>
+
+    <!-- Pantalla de Game Over -->
+    <div id="gameover-overlay" class="fixed inset-0 z-40 hidden items-center justify-center p-4 bg-[#080b16]/75 backdrop-blur-md">
+        <div class="w-full max-w-md rounded-3xl bg-[#101528]/95 border border-white/15 p-6 sm:p-8 chill-glow text-center space-y-6">
+            <div class="space-y-1.5">
+                <span class="text-[11px] uppercase tracking-[0.25em] text-lavender font-semibold">
+                    Sesión Nocturna Finalizada
+                </span>
+                <h2 class="font-display font-bold text-2xl sm:text-3xl text-white">
+                    CAÍSTE AL VACÍO
+                </h2>
+            </div>
+
+            <!-- Resumen de estadísticas -->
+            <div class="grid grid-cols-3 gap-2.5">
+                <div class="p-3 rounded-2xl bg-white/[0.04] border border-white/10">
+                    <div class="text-[10px] uppercase tracking-wider text-slate-400">Distancia</div>
+                    <div id="end-distance" class="font-display font-bold text-base sm:text-lg text-pastelCyan mt-0.5">0 m</div>
+                </div>
+                <div class="p-3 rounded-2xl bg-white/[0.04] border border-white/10">
+                    <div class="text-[10px] uppercase tracking-wider text-slate-400">Orbes Zen</div>
+                    <div id="end-orbs" class="font-display font-bold text-base sm:text-lg text-lavender mt-0.5">0</div>
+                </div>
+                <div class="p-3 rounded-2xl bg-white/[0.04] border border-white/10">
+                    <div class="text-[10px] uppercase tracking-wider text-slate-400">Mejor</div>
+                    <div id="end-best" class="font-display font-bold text-base sm:text-lg text-warmAmber mt-0.5">0</div>
+                </div>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between">
+                <span class="text-xs uppercase tracking-widest text-slate-400">Puntuación Total</span>
+                <span id="end-score" class="font-display font-bold text-xl text-white">0</span>
+            </div>
+
+            <button id="retry-btn" onclick="startGame()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-pastelCyan to-lavender hover:brightness-105 active:scale-[0.99] text-[#090d1a] font-display font-bold text-base uppercase tracking-[0.18em] shadow-[0_0_25px_rgba(196,181,253,0.35)] transition-all">
+                Reintentar
+            </button>
+            <p class="text-[11px] text-slate-400">También puedes presionar <span class="text-slate-200 font-medium">Espacio</span> o <span class="text-slate-200 font-medium">Enter</span></p>
+        </div>
+    </div>
+
+    <script>
+        /* ==========================================================================
+           1. CONFIGURACIÓN DEL CANVAS Y SISTEMA DE NOTIFICACIONES
+           ========================================================================== */
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+
+        function resizeCanvas() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = Math.floor(width * dpr);
+            canvas.height = Math.floor(height * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function showToast(text) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'px-4 py-2 rounded-full bg-[#13192e]/90 border border-lavender/40 text-xs font-medium text-slate-100 shadow-lg backdrop-blur-md transition-all duration-300';
+            toast.textContent = text;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-8px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 2200);
+        }
+
+        /* ==========================================================================
+           2. MOTOR DE AUDIO RELAJANTE LO-FI / CHILLWAVE (WEB AUDIO API + MP3)
+           ========================================================================== */
+        let audioCtx = null;
+        let masterGain = null;
+        let isMuted = false;
+        let usingCustomMp3 = false;
+        let lofiTimer = null;
+        let vinylNode = null;
+        let chordStep = 0;
+        let beatStep = 0;
+
+        const customAudioEl = document.getElementById('custom-audio-player');
+
+        // Progresión de acordes cálidos estilo Rhodes (Fmaj7 -> Em7 -> Dm9 -> Cmaj7)
+        const chillChords = [
+            [174.61, 220.00, 261.63, 329.63, 392.00], // Fmaj9
+            [164.81, 196.00, 246.94, 293.66, 392.00], // Em7
+            [146.83, 174.61, 220.00, 261.63, 329.63], // Dm9
+            [130.81, 196.00, 246.94, 293.66, 329.63]  // Cmaj9
+        ];
+
+        function initAudioEngine() {
+            if (!audioCtx) {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new Ctx();
+                masterGain = audioCtx.createGain();
+                masterGain.gain.value = isMuted ? 0 : 0.42;
+                masterGain.connect(audioCtx.destination);
+                startVinylTexture();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Textura suave de vinilo analógico en el fondo
+        function startVinylTexture() {
+            if (!audioCtx || vinylNode) return;
+            const bufferSize = audioCtx.sampleRate * 3;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+
+            for (let i = 0; i < bufferSize; i++) {
+                // Chisporroteo muy sutil y ruido rosa tenue
+                const r = Math.random();
+                data[i] = r > 0.9985 ? (Math.random() * 2 - 1) * 0.25 : (Math.random() * 2 - 1) * 0.006;
+            }
+
+            vinylNode = audioCtx.createBufferSource();
+            vinylNode.buffer = buffer;
+            vinylNode.loop = true;
+
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = 1800;
+            filter.Q.value = 0.9;
+
+            const gain = audioCtx.createGain();
+            gain.gain.value = 0.35;
+
+            vinylNode.connect(filter);
+            filter.connect(gain);
+            gain.connect(masterGain);
+            vinylNode.start();
+        }
+
+        // Acorde cálido tipo piano eléctrico Rhodes con filtro paso bajo suave
+        function playRhodesChord(freqs, durationSec) {
+            if (!audioCtx || isMuted || usingCustomMp3) return;
+            const now = audioCtx.currentTime;
+
+            const lpf = audioCtx.createBiquadFilter();
+            lpf.type = 'lowpass';
+            lpf.frequency.setValueAtTime(920, now);
+            lpf.frequency.exponentialRampToValueAtTime(420, now + durationSec);
+
+            const chordGain = audioCtx.createGain();
+            chordGain.gain.setValueAtTime(0.0001, now);
+            chordGain.gain.linearRampToValueAtTime(0.14, now + 0.18);
+            chordGain.gain.exponentialRampToValueAtTime(0.0008, now + durationSec);
+
+            lpf.connect(chordGain);
+            chordGain.connect(masterGain);
+
+            freqs.forEach((f, idx) => {
+                const osc = audioCtx.createOscillator();
+                osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+                // Ligera desafinación cálida tipo cinta lo-fi
+                osc.frequency.setValueAtTime(f * (1 + (Math.random() - 0.5) * 0.003), now);
+                osc.connect(lpf);
+                osc.start(now + idx * 0.025);
+                osc.stop(now + durationSec + 0.05);
+            });
+        }
+
+        // Pulso rítmico lo-fi lento (bombo suave y rimshot tenue)
+        function playLofiPercussion(step) {
+            if (!audioCtx || isMuted || usingCustomMp3) return;
+            const now = audioCtx.currentTime;
+
+            // Bombo suave en tiempos 0 y 5
+            if (step === 0 || step === 5) {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(105, now);
+                osc.frequency.exponentialRampToValueAtTime(42, now + 0.16);
+
+                gain.gain.setValueAtTime(0.24, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+                osc.connect(gain);
+                gain.connect(masterGain);
+                osc.start(now);
+                osc.stop(now + 0.24);
+            }
+
+            // Rimshot / snare lo-fi filtrado en tiempos 2 y 6
+            if (step === 2 || step === 6) {
+                const len = Math.floor(audioCtx.sampleRate * 0.07);
+                const buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+                const ch = buf.getChannelData(0);
+                for (let i = 0; i < len; i++) {
+                    ch[i] = (Math.random() * 2 - 1) * Math.exp(-i / (len * 0.3));
+                }
+
+                const src = audioCtx.createBufferSource();
+                src.buffer = buf;
+
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.value = 1100;
+                filter.Q.value = 1.8;
+
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0.09, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+
+                src.connect(filter);
+                filter.connect(gain);
+                gain.connect(masterGain);
+                src.start(now);
+            }
+        }
+
+        function startChillSoundtrack() {
+            initAudioEngine();
+            if (lofiTimer) return;
+
+            const bpm = 76; // Tempo lento relajante
+            const eighthMs = ((60 / bpm) / 2) * 1000;
+
+            const tick = () => {
+                if (beatStep % 8 === 0) {
+                    const chord = chillChords[chordStep % chillChords.length];
+                    playRhodesChord(chord, (eighthMs * 7.8) / 1000);
+                    chordStep++;
+                }
+                playLofiPercussion(beatStep % 8);
+                beatStep++;
+                lofiTimer = setTimeout(tick, eighthMs);
+            };
+            tick();
+        }
+
+        // Efectos de sonido suaves (campanillas / viento)
+        function playSfx(type) {
+            if (!audioCtx || isMuted) return;
+            const now = audioCtx.currentTime;
+
+            if (type === 'jump' || type === 'doubleJump') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                const base = type === 'jump' ? 310 : 440;
+                osc.frequency.setValueAtTime(base, now);
+                osc.frequency.exponentialRampToValueAtTime(base * 1.45, now + 0.14);
+
+                gain.gain.setValueAtTime(0.11, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+
+                osc.connect(gain);
+                gain.connect(masterGain);
+                osc.start(now);
+                osc.stop(now + 0.17);
+            } else if (type === 'slide') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(240, now);
+                osc.frequency.exponentialRampToValueAtTime(110, now + 0.18);
+
+                gain.gain.setValueAtTime(0.09, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.19);
+
+                osc.connect(gain);
+                gain.connect(masterGain);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            } else if (type === 'orb') {
+                // Campanilla pentatónica relajante
+                const notes = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50];
+                const freq = notes[Math.floor(Math.random() * notes.length)];
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now);
+
+                gain.gain.setValueAtTime(0.13, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+
+                osc.connect(gain);
+                gain.connect(masterGain);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'perfect') {
+                // Acorde brillante suave para aterrizaje perfecto
+                [523.25, 659.25, 987.77].forEach((f, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(f, now + idx * 0.03);
+                    gain.gain.setValueAtTime(0.1, now + idx * 0.03);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+                    osc.connect(gain);
+                    gain.connect(masterGain);
+                    osc.start(now + idx * 0.03);
+                    osc.stop(now + 0.46);
+                });
+            } else if (type === 'flow') {
+                // Activación de Astral Flow
+                [440, 554.37, 659.25, 880].forEach((f, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(f, now + idx * 0.045);
+                    gain.gain.setValueAtTime(0.12, now + idx * 0.045);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+                    osc.connect(gain);
+                    gain.connect(masterGain);
+                    osc.start(now + idx * 0.045);
+                    osc.stop(now + 0.68);
+                });
+            }
+        }
+
+        function toggleAudioMute() {
+            initAudioEngine();
+            isMuted = !isMuted;
+            document.getElementById('icon-sound-on').classList.toggle('hidden', isMuted);
+            document.getElementById('icon-sound-off').classList.toggle('hidden', !isMuted);
+
+            if (masterGain && audioCtx) {
+                masterGain.gain.setTargetAtTime(isMuted ? 0 : 0.42, audioCtx.currentTime, 0.05);
+            }
+            if (usingCustomMp3) {
+                customAudioEl.muted = isMuted;
+            }
+        }
+
+        function handleCustomAudio(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+            initAudioEngine();
+
+            const url = URL.createObjectURL(file);
+            customAudioEl.src = url;
+            customAudioEl.volume = 0.65;
+            customAudioEl.muted = isMuted;
+            usingCustomMp3 = true;
+
+            customAudioEl.play().then(() => {
+                showToast(`Reproduciendo: ${file.name.slice(0, 26)}`);
+            }).catch(() => {
+                showToast('Toca Jugar para iniciar tu audio');
+            });
+        }
+
+        /* ==========================================================================
+           3. ESTADO DEL JUEGO, FÍSICA Y ENTIDADES
+           ========================================================================== */
+        const STORAGE_BEST_KEY = 'cyber_rooftop_chill_best_v1';
+        let bestScore = parseInt(localStorage.getItem(STORAGE_BEST_KEY) || '0', 10);
+        document.getElementById('hud-best').textContent = bestScore;
+
+        let gameState = 'START'; // 'START' | 'PLAYING' | 'GAMEOVER'
+        let lastTimestamp = 0;
+
+        // Métricas de partida
+        let distance = 0;
+        let bonusScore = 0;
+        let orbsCollected = 0;
+        let combo = 1;
+        let comboTimer = 0;
+
+        // Medidor y estado de Astral Flow
+        let flowCharge = 0; // 0 a 100
+        let astralFlowActive = false;
+        let astralFlowTimer = 0;
+        const ASTRAL_DURATION = 7.5; // segundos
+
+        // Velocidad base progresiva (suave y rítmica, nunca frenética)
+        const BASE_SPEED = 360;
+        const MAX_SPEED = 640;
+        let currentSpeed = BASE_SPEED;
+
+        // Jugador (corredor nocturno)
+        const player = {
+            x: 140,
+            y: 260,
+            vx: 0,
+            vy: 0,
+            width: 30,
+            standHeight: 54,
+            slideHeight: 26,
+            height: 54,
+            grounded: false,
+            jumpsUsed: 0,
+            maxJumps: 2,
+            isSliding: false,
+            slideTimer: 0,
+            airDashUsed: false,
+            trail: [],
+            runCycle: 0
+        };
+
+        // Listas de mundo
+        let rooftops = [];
+        let obstacles = [];
+        let zenOrbs = [];
+        let floatingTexts = [];
+        let particles = [];
+
+        // Capas de fondo en parallax (edificios lejanos y medios)
+        let farBuildings = [];
+        let midBuildings = [];
+        let rainDrops = [];
+        let fireflies = [];
+
+        function initBackdrop() {
+            farBuildings = [];
+            midBuildings = [];
+            rainDrops = [];
+            fireflies = [];
+
+            let fx = 0;
+            while (fx < width + 400) {
+                const w = 70 + Math.random() * 110;
+                const h = 150 + Math.random() * 240;
+                farBuildings.push({
+                    x: fx,
+                    w,
+                    h,
+                    windows: generateWindowPattern(w, h, 0.25)
+                });
+                fx += w + 12 + Math.random() * 24;
+            }
+
+            let mx = 0;
+            while (mx < width + 500) {
+                const w = 95 + Math.random() * 140;
+                const h = 120 + Math.random() * 210;
+                midBuildings.push({
+                    x: mx,
+                    w,
+                    h,
+                    hasSpire: Math.random() > 0.55,
+                    windows: generateWindowPattern(w, h, 0.35)
+                });
+                mx += w + 25 + Math.random() * 45;
+            }
+
+            // Lluvia tenue relajante
+            for (let i = 0; i < 85; i++) {
+                rainDrops.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    len: 10 + Math.random() * 14,
+                    speed: 420 + Math.random() * 220,
+                    alpha: 0.08 + Math.random() * 0.14
+                });
+            }
+
+            // Luciérnagas / partículas ambientales cálidas y lavanda
+            for (let i = 0; i < 28; i++) {
+                fireflies.push({
+                    x: Math.random() * width,
+                    y: Math.random() * (height * 0.75),
+                    r: 1.5 + Math.random() * 2.2,
+                    phase: Math.random() * Math.PI * 2,
+                    speedX: -18 - Math.random() * 22,
+                    color: i % 2 === 0 ? '#c4b5fd' : '#fcd34d'
+                });
+            }
+        }
+
+        function generateWindowPattern(bw, bh, density) {
+            const wins = [];
+            const cols = Math.floor((bw - 18) / 14);
+            const rows = Math.floor((bh - 24) / 18);
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (Math.random() < density) {
+                        wins.push({
+                            rx: 10 + c * 14,
+                            ry: 16 + r * 18,
+                            warm: Math.random() > 0.32
+                        });
+                    }
+                }
+            }
+            return wins;
+        }
+
+        /* ==========================================================================
+           4. GENERACIÓN PROCEDURAL DE AZOTEAS, OBSTÁCULOS Y ORBES ZEN
+           ========================================================================== */
+        function resetWorld() {
+            distance = 0;
+            bonusScore = 0;
+            orbsCollected = 0;
+            combo = 1;
+            comboTimer = 0;
+            flowCharge = 0;
+            astralFlowActive = false;
+            astralFlowTimer = 0;
+            currentSpeed = BASE_SPEED;
+
+            rooftops = [];
+            obstacles = [];
+            zenOrbs = [];
+            floatingTexts = [];
+            particles = [];
+
+            const startY = Math.round(height * 0.64);
+            // Azotea inicial larga y segura
+            rooftops.push({
+                x: 0,
+                y: startY,
+                w: Math.max(920, width * 0.85),
+                h: height - startY + 120,
+                accent: '#7dd3fc',
+                windows: generateWindowPattern(Math.max(920, width * 0.85), 320, 0.28)
+            });
+
+            player.x = Math.min(180, width * 0.22);
+            player.y = startY - player.standHeight;
+            player.vy = 0;
+            player.height = player.standHeight;
+            player.grounded = true;
+            player.jumpsUsed = 0;
+            player.isSliding = false;
+            player.slideTimer = 0;
+            player.airDashUsed = false;
+            player.trail = [];
+
+            // Poblar azoteas siguientes
+            while (getLastRooftopRight() < width + 900) {
+                spawnNextRooftop();
+            }
+        }
+
+        function getLastRooftopRight() {
+            if (rooftops.length === 0) return 0;
+            const last = rooftops[rooftops.length - 1];
+            return last.x + last.w;
+        }
+
+        function spawnNextRooftop() {
+            const prev = rooftops[rooftops.length - 1];
+            // Brecha alcanzable siempre con salto o doble salto
+            const minGap = 115;
+            const maxGap = Math.min(250, 145 + (currentSpeed - BASE_SPEED) * 0.32);
+            const gap = minGap + Math.random() * (maxGap - minGap);
+
+            const minY = Math.max(210, height * 0.42);
+            const maxY = Math.min(height - 115, height * 0.78);
+            // Variación vertical controlada para que nunca sea imposible subir
+            let nextY = prev.y + (Math.random() * 150 - 80);
+            nextY = Math.max(minY, Math.min(maxY, nextY));
+
+            const nextW = 360 + Math.random() * 440;
+            const nextX = prev.x + prev.w + gap;
+            const accents = ['#7dd3fc', '#c4b5fd', '#fcd34d'];
+            const accent = accents[Math.floor(Math.random() * accents.length)];
+
+            const roof = {
+                x: nextX,
+                y: Math.round(nextY),
+                w: Math.round(nextW),
+                h: height - Math.round(nextY) + 140,
+                accent,
+                windows: generateWindowPattern(nextW, 340, 0.28)
+            };
+            rooftops.push(roof);
+
+            // Arco de Orbes Zen sobre la brecha
+            if (Math.random() < 0.78) {
+                const orbCount = 3;
+                for (let i = 0; i < orbCount; i++) {
+                    const t = (i + 1) / (orbCount + 1);
+                    const ox = prev.x + prev.w + gap * t;
+                    const midBaseY = Math.min(prev.y, roof.y) - 65;
+                    const arcOffset = Math.sin(t * Math.PI) * 42;
+                    zenOrbs.push({
+                        x: ox,
+                        y: midBaseY - arcOffset,
+                        r: 10,
+                        collected: false,
+                        pulse: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+
+            // Generar obstáculos en la azotea si tiene suficiente longitud
+            if (roof.w > 420) {
+                const obsX = roof.x + 170 + Math.random() * (roof.w - 300);
+                const isDrone = Math.random() > 0.48;
+
+                if (isDrone) {
+                    // Dron de seguridad flotando a altura de cabeza (hay que deslizarse por debajo)
+                    obstacles.push({
+                        type: 'drone',
+                        x: obsX,
+                        baseY: roof.y - 44,
+                        y: roof.y - 44,
+                        w: 44,
+                        h: 20,
+                        phase: Math.random() * Math.PI * 2
+                    });
+
+                    // Orbes bajos invitando a deslizarse
+                    zenOrbs.push({
+                        x: obsX + 10,
+                        y: roof.y - 16,
+                        r: 9,
+                        collected: false,
+                        pulse: 0
+                    });
+                } else {
+                    // Unidad de aire acondicionado / antena baja (hay que saltar por encima)
+                    const h = 34 + Math.random() * 12;
+                    obstacles.push({
+                        type: 'vent',
+                        x: obsX,
+                        y: roof.y - h,
+                        w: 38,
+                        h: h
+                    });
+
+                    // Orbe arriba del obstáculo
+                    zenOrbs.push({
+                        x: obsX + 19,
+                        y: roof.y - h - 46,
+                        r: 10,
+                        collected: false,
+                        pulse: 1
+                    });
+                }
+            }
+        }
+
+        function addFloatingText(x, y, text, color = '#7dd3fc') {
+            floatingTexts.push({
+                x,
+                y,
+                text,
+                color,
+                alpha: 1,
+                vy: -42
+            });
+        }
+
+        function spawnBurstParticles(x, y, color, count = 12) {
+            for (let i = 0; i < count; i++) {
+                const angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
+                const spd = 60 + Math.random() * 140;
+                particles.push({
+                    x,
+                    y,
+                    vx: Math.cos(angle) * spd,
+                    vy: Math.sin(angle) * spd - 30,
+                    r: 2 + Math.random() * 2.5,
+                    color,
+                    alpha: 1,
+                    life: 0.55 + Math.random() * 0.3
+                });
+            }
+        }
+
+        /* ==========================================================================
+           5. CONTROLES DEL JUGADOR (TECLADO, RATÓN Y GESTOS TÁCTILES)
+           ========================================================================== */
+        function triggerJump() {
+            if (gameState !== 'PLAYING') return;
+
+            if (player.grounded) {
+                player.vy = -610;
+                player.grounded = false;
+                player.jumpsUsed = 1;
+                endSlide();
+                playSfx('jump');
+                spawnBurstParticles(player.x + player.width / 2, player.y + player.height, '#7dd3fc', 8);
+            } else if (player.jumpsUsed < player.maxJumps) {
+                player.vy = -560;
+                player.jumpsUsed++;
+                endSlide();
+                playSfx('doubleJump');
+                spawnBurstParticles(player.x + player.width / 2, player.y + player.height, '#c4b5fd', 12);
+                addFloatingText(player.x, player.y - 10, 'DOBLE SALTO', '#c4b5fd');
+            }
+        }
+
+        function triggerSlideOrAirDash() {
+            if (gameState !== 'PLAYING') return;
+
+            if (player.grounded) {
+                if (!player.isSliding) {
+                    player.isSliding = true;
+                    player.slideTimer = 0.68;
+                    const bottomY = player.y + player.height;
+                    player.height = player.slideHeight;
+                    player.y = bottomY - player.height;
+                    playSfx('slide');
+                    spawnBurstParticles(player.x, bottomY - 4, '#c4b5fd', 7);
+                } else {
+                    // Extender ligeramente si vuelve a pulsar abajo
+                    player.slideTimer = Math.max(player.slideTimer, 0.45);
+                }
+            } else if (!player.airDashUsed) {
+                // Impulso aéreo rápido hacia abajo-adelante para aterrizar con precisión
+                player.airDashUsed = true;
+                player.vy = Math.max(player.vy + 460, 520);
+                playSfx('slide');
+                spawnBurstParticles(player.x + player.width / 2, player.y + player.height / 2, '#7dd3fc', 10);
+            }
+        }
+
+        function endSlide() {
+            if (!player.isSliding) return;
+            const bottomY = player.y + player.height;
+            player.isSliding = false;
+            player.slideTimer = 0;
+            player.height = player.standHeight;
+            player.y = bottomY - player.height;
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (['Space', 'ArrowUp', 'ArrowDown', 'KeyW', 'KeyS'].includes(e.code)) {
+                e.preventDefault();
+            }
+
+            if (gameState === 'START' && (e.code === 'Space' || e.code === 'Enter')) {
+                startGame();
+                return;
+            }
+
+            if (gameState === 'GAMEOVER' && (e.code === 'Space' || e.code === 'Enter')) {
+                startGame();
+                return;
+            }
+
+            if (gameState === 'PLAYING') {
+                if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+                    triggerJump();
+                } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+                    triggerSlideOrAirDash();
+                }
+            }
+        });
+
+        // Soporte táctil por gestos (Tap = Saltar, Swipe Down = Deslizar)
+        let touchStartY = 0;
+        let touchHandled = false;
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (gameState !== 'PLAYING') return;
+            const t = e.touches[0];
+            touchStartY = t.clientY;
+            touchHandled = false;
+        }, { passive: true });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (gameState !== 'PLAYING' || touchHandled) return;
+            const t = e.touches[0];
+            const dy = t.clientY - touchStartY;
+            if (dy > 32) {
+                triggerSlideOrAirDash();
+                touchHandled = true;
+            }
+        }, { passive: true });
+
+        canvas.addEventListener('touchend', () => {
+            if (gameState !== 'PLAYING') return;
+            if (!touchHandled) {
+                triggerJump();
+            }
+        });
+
+        // Botones táctiles dedicados en pantalla móvil
+        document.getElementById('btn-touch-jump').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            triggerJump();
+        }, { passive: false });
+
+        document.getElementById('btn-touch-slide').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            triggerSlideOrAirDash();
+        }, { passive: false });
+
+        /* ==========================================================================
+           6. BUCLE DE ACTUALIZACIÓN DE FÍSICA Y LÓGICA
+           ========================================================================== */
+        function startGame() {
+            initBackdrop();
+            resetWorld();
+            gameState = 'PLAYING';
+
+            document.getElementById('start-overlay').classList.add('hidden');
+            const goOverlay = document.getElementById('gameover-overlay');
+            goOverlay.classList.add('hidden');
+            goOverlay.classList.remove('flex');
+
+            startChillSoundtrack();
+            if (usingCustomMp3 && customAudioEl.paused) {
+                customAudioEl.play().catch(() => {});
+            }
+        }
+
+        function triggerGameOver() {
+            if (gameState === 'GAMEOVER') return;
+            gameState = 'GAMEOVER';
+
+            const totalScore = Math.floor(distance * 2 + bonusScore);
+            if (totalScore > bestScore) {
+                bestScore = totalScore;
+                localStorage.setItem(STORAGE_BEST_KEY, String(bestScore));
+                document.getElementById('hud-best').textContent = bestScore;
+            }
+
+            document.getElementById('end-distance').textContent = `${Math.floor(distance)} m`;
+            document.getElementById('end-orbs').textContent = orbsCollected;
+            document.getElementById('end-best').textContent = bestScore;
+            document.getElementById('end-score').textContent = totalScore;
+
+            const goOverlay = document.getElementById('gameover-overlay');
+            goOverlay.classList.remove('hidden');
+            goOverlay.classList.add('flex');
+        }
+
+        function update(dt) {
+            // Actualizar partículas ambientales de fondo siempre
+            updateAmbientBackdrop(dt);
+
+            if (gameState !== 'PLAYING') return;
+
+            // Velocidad progresiva suave
+            const targetSpeed = Math.min(MAX_SPEED, BASE_SPEED + distance * 0.16);
+            currentSpeed += (targetSpeed - currentSpeed) * dt * 1.5;
+
+            // Factor de cámara lenta suave en modo Astral Flow
+            const worldTimeScale = astralFlowActive ? 0.74 : 1.0;
+            const moveDx = currentSpeed * worldTimeScale * dt;
+
+            distance += moveDx * 0.045;
+
+            // Gestión de combo
+            if (combo > 1) {
+                comboTimer -= dt;
+                if (comboTimer <= 0) {
+                    combo = 1;
+                }
+            }
+
+            // Gestión de modo Astral Flow
+            if (astralFlowActive) {
+                astralFlowTimer -= dt;
+                flowCharge = Math.max(0, (astralFlowTimer / ASTRAL_DURATION) * 100);
+                if (astralFlowTimer <= 0) {
+                    astralFlowActive = false;
+                    flowCharge = 0;
+                    showToast('Astral Flow finalizado');
+                }
+            }
+
+            // Temporizador de deslizamiento
+            if (player.isSliding) {
+                player.slideTimer -= dt;
+                if (player.slideTimer <= 0) {
+                    endSlide();
+                }
+            }
+
+            // Física vertical del jugador (planeo más suave en Astral Flow)
+            const gravity = astralFlowActive && player.vy > 0 ? 920 : 1580;
+            const prevBottom = player.y + player.height;
+            player.vy += gravity * dt;
+            player.y += player.vy * dt;
+            const newBottom = player.y + player.height;
+
+            // Desplazar azoteas y comprobar aterrizaje
+            let landedRoof = null;
+            for (let i = 0; i < rooftops.length; i++) {
+                const r = rooftops[i];
+                r.x -= moveDx;
+
+                const withinX = (player.x + player.width - 6) > r.x && (player.x + 6) < (r.x + r.w);
+                if (withinX && player.vy >= 0 && prevBottom <= r.y + 14 && newBottom >= r.y) {
+                    landedRoof = r;
+                }
+            }
+
+            if (landedRoof) {
+                const wasInAir = !player.grounded;
+                player.y = landedRoof.y - player.height;
+                player.vy = 0;
+                player.grounded = true;
+                player.jumpsUsed = 0;
+                player.airDashUsed = false;
+
+                // Detectar "Perfect Landing" si aterriza cerca del borde izquierdo de la azotea
+                if (wasInAir && Math.abs(player.x - landedRoof.x) < 48) {
+                    combo = Math.min(8, combo + 1);
+                    comboTimer = 4.5;
+                    const pts = 75 * combo;
+                    bonusScore += pts;
+                    addFlowCharge(14);
+                    playSfx('perfect');
+                    spawnBurstParticles(player.x + player.width / 2, landedRoof.y, '#fcd34d', 14);
+                    addFloatingText(player.x, landedRoof.y - 28, `PERFECT LANDING +${pts}`, '#fcd34d');
+                }
+            } else {
+                player.grounded = false;
+            }
+
+            // Animación de carrera y estela luminosa
+            if (player.grounded) {
+                player.runCycle += dt * (currentSpeed * 0.032);
+            }
+            player.trail.unshift({
+                x: player.x + player.width * 0.4,
+                y: player.y + player.height * 0.5,
+                h: player.height * 0.75,
+                alpha: astralFlowActive ? 0.55 : 0.28
+            });
+            if (player.trail.length > 12) player.trail.pop();
+            player.trail.forEach(t => { t.x -= moveDx * 0.7; t.alpha *= 0.88; });
+
+            // Generar nuevas azoteas y limpiar las que salieron por la izquierda
+            while (getLastRooftopRight() < width + 900) {
+                spawnNextRooftop();
+            }
+            rooftops = rooftops.filter(r => r.x + r.w > -200);
+
+            // Actualizar Orbes Zen (con atracción magnética en Astral Flow)
+            const pCenterX = player.x + player.width / 2;
+            const pCenterY = player.y + player.height / 2;
+
+            zenOrbs.forEach(orb => {
+                if (orb.collected) return;
+                orb.x -= moveDx;
+                orb.pulse += dt * 4.5;
+
+                // Atracción magnética en modo Astral Flow
+                if (astralFlowActive) {
+                    const dx = pCenterX - orb.x;
+                    const dy = pCenterY - orb.y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist < 260 && dist > 1) {
+                        orb.x += (dx / dist) * 520 * dt;
+                        orb.y += (dy / dist) * 520 * dt;
+                    }
+                }
+
+                const distToPlayer = Math.hypot(pCenterX - orb.x, pCenterY - orb.y);
+                if (distToPlayer < orb.r + 24) {
+                    orb.collected = true;
+                    orbsCollected++;
+                    combo = Math.min(8, combo + 1);
+                    comboTimer = 4.2;
+                    const scoreMult = astralFlowActive ? 2 : 1;
+                    const pts = 25 * combo * scoreMult;
+                    bonusScore += pts;
+                    addFlowCharge(9);
+                    playSfx('orb');
+                    spawnBurstParticles(orb.x, orb.y, '#c4b5fd', 10);
+                    addFloatingText(orb.x, orb.y - 12, `+${pts}`, '#c4b5fd');
+                }
+            });
+            zenOrbs = zenOrbs.filter(o => !o.collected && o.x > -100);
+
+            // Actualizar Obstáculos y verificar colisiones justas
+            const hitBox = {
+                x: player.x + 6,
+                y: player.y + 4,
+                w: player.width - 12,
+                h: player.height - 6
+            };
+
+            for (let i = 0; i < obstacles.length; i++) {
+                const obs = obstacles[i];
+                obs.x -= moveDx;
+                if (obs.type === 'drone') {
+                    obs.phase += dt * 4;
+                    obs.y = obs.baseY + Math.sin(obs.phase) * 4;
+                }
+
+                const overlap =
+                    hitBox.x < obs.x + obs.w - 4 &&
+                    hitBox.x + hitBox.w > obs.x + 4 &&
+                    hitBox.y < obs.y + obs.h - 4 &&
+                    hitBox.y + hitBox.h > obs.y + 4;
+
+                if (overlap) {
+                    if (astralFlowActive) {
+                        // En modo Astral Flow atraviesas el obstáculo disolviéndolo con estilo
+                        obs.x = -999;
+                        bonusScore += 100;
+                        playSfx('orb');
+                        spawnBurstParticles(pCenterX, pCenterY, '#7dd3fc', 16);
+                        addFloatingText(pCenterX, player.y - 16, 'FASE ASTRAL +100', '#7dd3fc');
+                    } else {
+                        spawnBurstParticles(pCenterX, pCenterY, '#fca5a5', 22);
+                        triggerGameOver();
+                        return;
+                    }
+                }
+            }
+            obstacles = obstacles.filter(o => o.x + o.w > -120);
+
+            // Actualizar textos flotantes y partículas
+            floatingTexts.forEach(ft => {
+                ft.y += ft.vy * dt;
+                ft.alpha -= dt * 1.15;
+            });
+            floatingTexts = floatingTexts.filter(ft => ft.alpha > 0);
+
+            particles.forEach(pt => {
+                pt.x += pt.vx * dt;
+                pt.y += pt.vy * dt;
+                pt.vy += 220 * dt;
+                pt.life -= dt;
+                pt.alpha = Math.max(0, pt.life * 1.6);
+            });
+            particles = particles.filter(pt => pt.life > 0);
+
+            // Caída al vacío
+            if (player.y > height + 80) {
+                triggerGameOver();
+                return;
+            }
+
+            updateHud();
+        }
+
+        function addFlowCharge(amount) {
+            if (astralFlowActive) return;
+            flowCharge = Math.min(100, flowCharge + amount);
+            if (flowCharge >= 100) {
+                astralFlowActive = true;
+                astralFlowTimer = ASTRAL_DURATION;
+                playSfx('flow');
+                spawnBurstParticles(player.x + player.width / 2, player.y + player.height / 2, '#7dd3fc', 24);
+                showToast('✨ ASTRAL FLOW ACTIVADO (x2 Puntos + Planeo)');
+            }
+        }
+
+        function updateAmbientBackdrop(dt) {
+            const speedFactor = gameState === 'PLAYING' ? currentSpeed : 90;
+
+            farBuildings.forEach(b => {
+                b.x -= speedFactor * 0.12 * dt;
+                if (b.x + b.w < -40) {
+                    const maxX = Math.max(...farBuildings.map(item => item.x + item.w));
+                    b.x = maxX + 16 + Math.random() * 24;
+                }
+            });
+
+            midBuildings.forEach(b => {
+                b.x -= speedFactor * 0.28 * dt;
+                if (b.x + b.w < -60) {
+                    const maxX = Math.max(...midBuildings.map(item => item.x + item.w));
+                    b.x = maxX + 30 + Math.random() * 45;
+                }
+            });
+
+            rainDrops.forEach(r => {
+                r.x -= (r.speed * 0.28 + speedFactor * 0.35) * dt;
+                r.y += r.speed * dt;
+                if (r.y > height) {
+                    r.y = -20;
+                    r.x = Math.random() * (width + 200);
+                }
+                if (r.x < -20) {
+                    r.x += width + 40;
+                }
+            });
+
+            fireflies.forEach(f => {
+                f.phase += dt * 2.2;
+                f.x += f.speedX * dt;
+                f.y += Math.sin(f.phase) * 14 * dt;
+                if (f.x < -20) f.x = width + 20;
+            });
+        }
+
+        function updateHud() {
+            const totalScore = Math.floor(distance * 2 + bonusScore);
+            document.getElementById('hud-distance').textContent = `${Math.floor(distance)} m`;
+            document.getElementById('hud-score').textContent = totalScore;
+
+            const comboEl = document.getElementById('hud-combo');
+            if (combo > 1) {
+                comboEl.classList.remove('hidden');
+                comboEl.textContent = `x${combo}`;
+            } else {
+                comboEl.classList.add('hidden');
+            }
+
+            const pct = Math.round(flowCharge);
+            document.getElementById('flow-pct').textContent = `${pct}%`;
+            document.getElementById('flow-bar').style.width = `${pct}%`;
+            document.getElementById('flow-label').textContent = astralFlowActive ? 'ASTRAL ACTIVO' : 'Astral Flow';
+        }
+
+        /* ==========================================================================
+           7. RENDERIZADO ATMOSFÉRICO 2D (CIELO CREPUSCULAR, PARALLAX Y JUGADOR)
+           ========================================================================== */
+        function render() {
+            // 1. Degradado de cielo crepuscular nocturno suave (índigo / pizarra)
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, height);
+            skyGrad.addColorStop(0, '#090c18');
+            skyGrad.addColorStop(0.52, '#131a31');
+            skyGrad.addColorStop(1, '#1c2440');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            // 2. Luna pastel difusa en el horizonte
+            const moonX = width * 0.76;
+            const moonY = height * 0.22;
+            const moonHalo = ctx.createRadialGradient(moonX, moonY, 12, moonX, moonY, 170);
+            moonHalo.addColorStop(0, 'rgba(196, 181, 253, 0.28)');
+            moonHalo.addColorStop(0.45, 'rgba(125, 211, 252, 0.08)');
+            moonHalo.addColorStop(1, 'rgba(196, 181, 253, 0)');
+            ctx.fillStyle = moonHalo;
+            ctx.beginPath();
+            ctx.arc(moonX, moonY, 170, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = 'rgba(238, 242, 255, 0.85)';
+            ctx.beginPath();
+            ctx.arc(moonX, moonY, 26, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 3. Skyline lejano (Parallax capa 1)
+            farBuildings.forEach(b => {
+                const by = height - b.h;
+                ctx.fillStyle = '#0e1324';
+                ctx.fillRect(b.x, by, b.w, b.h);
+
+                b.windows.forEach(w => {
+                    ctx.fillStyle = w.warm ? 'rgba(252, 211, 77, 0.16)' : 'rgba(125, 211, 252, 0.14)';
+                    ctx.fillRect(b.x + w.rx, by + w.ry, 5, 7);
+                });
+            });
+
+            // 4. Skyline medio (Parallax capa 2)
+            midBuildings.forEach(b => {
+                const by = height - b.h;
+                ctx.fillStyle = '#12182d';
+                ctx.fillRect(b.x, by, b.w, b.h);
+
+                if (b.hasSpire) {
+                    ctx.fillStyle = 'rgba(196, 181, 253, 0.35)';
+                    ctx.fillRect(b.x + b.w * 0.5 - 1, by - 26, 2, 26);
+                }
+
+                b.windows.forEach(w => {
+                    ctx.fillStyle = w.warm ? 'rgba(252, 211, 77, 0.28)' : 'rgba(196, 181, 253, 0.22)';
+                    ctx.fillRect(b.x + w.rx, by + w.ry, 6, 8);
+                });
+            });
+
+            // 5. Neblina ambiental inferior suave
+            const mistGrad = ctx.createLinearGradient(0, height * 0.65, 0, height);
+            mistGrad.addColorStop(0, 'rgba(19, 26, 49, 0)');
+            mistGrad.addColorStop(1, 'rgba(11, 14, 26, 0.72)');
+            ctx.fillStyle = mistGrad;
+            ctx.fillRect(0, height * 0.65, width, height * 0.35);
+
+            // 6. Azoteas jugables
+            rooftops.forEach(r => {
+                // Cuerpo oscuro elegante del edificio
+                const bGrad = ctx.createLinearGradient(0, r.y, 0, r.y + r.h);
+                bGrad.addColorStop(0, '#182039');
+                bGrad.addColorStop(1, '#0c101f');
+                ctx.fillStyle = bGrad;
+                ctx.fillRect(r.x, r.y, r.w, r.h);
+
+                // Ventanas cálidas ámbar y cian pastel
+                r.windows.forEach(w => {
+                    if (r.y + w.ry < height) {
+                        ctx.fillStyle = w.warm ? 'rgba(252, 211, 77, 0.34)' : 'rgba(125, 211, 252, 0.24)';
+                        ctx.fillRect(r.x + w.rx, r.y + w.ry, 7, 10);
+                    }
+                });
+
+                // Cornisa superior luminosa pastel
+                ctx.fillStyle = r.accent;
+                ctx.globalAlpha = 0.72;
+                ctx.fillRect(r.x, r.y, r.w, 3);
+                ctx.globalAlpha = 1;
+
+                // Indicador sutil en el borde izquierdo para "Perfect Landing"
+                ctx.fillStyle = 'rgba(252, 211, 77, 0.45)';
+                ctx.fillRect(r.x, r.y, 38, 3);
+            });
+
+            // 7. Orbes Zen (esferas brillantes lavanda/cian)
+            zenOrbs.forEach(orb => {
+                if (orb.collected) return;
+                const glowR = orb.r + 8 + Math.sin(orb.pulse) * 3;
+                const g = ctx.createRadialGradient(orb.x, orb.y, 2, orb.x, orb.y, glowR);
+                g.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+                g.addColorStop(0.45, 'rgba(196, 181, 253, 0.75)');
+                g.addColorStop(1, 'rgba(125, 211, 252, 0)');
+                ctx.fillStyle = g;
+                ctx.beginPath();
+                ctx.arc(orb.x, orb.y, glowR, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // 8. Obstáculos (Drones flotantes y unidades/antenas)
+            obstacles.forEach(obs => {
+                if (obs.type === 'drone') {
+                    // Cuerpo de dron minimalista
+                    ctx.fillStyle = '#252f4d';
+                    ctx.beginPath();
+                    ctx.roundRect(obs.x, obs.y, obs.w, obs.h, 8);
+                    ctx.fill();
+
+                    ctx.strokeStyle = 'rgba(196, 181, 253, 0.6)';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+
+                    // Visor sensor ámbar suave
+                    ctx.fillStyle = '#fcd34d';
+                    ctx.beginPath();
+                    ctx.roundRect(obs.x + 6, obs.y + 7, 14, 5, 3);
+                    ctx.fill();
+                } else {
+                    // Unidad técnica / antena en azotea
+                    ctx.fillStyle = '#202945';
+                    ctx.beginPath();
+                    ctx.roundRect(obs.x, obs.y, obs.w, obs.h, 5);
+                    ctx.fill();
+
+                    ctx.strokeStyle = 'rgba(125, 211, 252, 0.45)';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+
+                    // Antena con luz piloto suave
+                    ctx.strokeStyle = 'rgba(148, 163, 184, 0.6)';
+                    ctx.beginPath();
+                    ctx.moveTo(obs.x + obs.w * 0.5, obs.y);
+                    ctx.lineTo(obs.x + obs.w * 0.5, obs.y - 12);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#fcd34d';
+                    ctx.beginPath();
+                    ctx.arc(obs.x + obs.w * 0.5, obs.y - 13, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            // 9. Jugador (silueta estilizada cyber-runner + bufanda luminosa)
+            drawPlayer();
+
+            // 10. Partículas de impacto y luciérnagas/lluvia
+            particles.forEach(pt => {
+                ctx.globalAlpha = pt.alpha;
+                ctx.fillStyle = pt.color;
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+
+            fireflies.forEach(f => {
+                ctx.globalAlpha = 0.35 + Math.sin(f.phase) * 0.25;
+                ctx.fillStyle = f.color;
+                ctx.beginPath();
+                ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+
+            ctx.strokeStyle = 'rgba(186, 230, 253, 0.16)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            rainDrops.forEach(r => {
+                ctx.moveTo(r.x, r.y);
+                ctx.lineTo(r.x - r.len * 0.28, r.y + r.len);
+            });
+            ctx.stroke();
+
+            // 11. Textos flotantes de bonificación
+            floatingTexts.forEach(ft => {
+                ctx.globalAlpha = Math.max(0, ft.alpha);
+                ctx.font = '700 12px "Space Grotesk", sans-serif';
+                ctx.fillStyle = ft.color;
+                ctx.fillText(ft.text, ft.x, ft.y);
+            });
+            ctx.globalAlpha = 1;
+        }
+
+        function drawPlayer() {
+            const auraColor = astralFlowActive ? '#7dd3fc' : '#c4b5fd';
+
+            // Estela suave detrás del corredor
+            player.trail.forEach((t, idx) => {
+                ctx.globalAlpha = t.alpha * (1 - idx / player.trail.length);
+                ctx.fillStyle = auraColor;
+                ctx.beginPath();
+                ctx.roundRect(t.x - 6, t.y - t.h * 0.45, 12, t.h * 0.9, 6);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+
+            // Aura circular si Astral Flow está activo
+            if (astralFlowActive) {
+                const cx = player.x + player.width / 2;
+                const cy = player.y + player.height / 2;
+                const aura = ctx.createRadialGradient(cx, cy, 4, cx, cy, 46);
+                aura.addColorStop(0, 'rgba(125, 211, 252, 0.35)');
+                aura.addColorStop(1, 'rgba(196, 181, 253, 0)');
+                ctx.fillStyle = aura;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 46, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.save();
+            const px = player.x;
+            const py = player.y;
+
+            if (player.isSliding) {
+                // Pose deslizando baja
+                ctx.fillStyle = '#e2e8f0';
+                ctx.beginPath();
+                ctx.roundRect(px - 4, py + 4, player.width + 12, player.height - 4, 10);
+                ctx.fill();
+
+                // Visor cian pastel
+                ctx.fillStyle = '#7dd3fc';
+                ctx.beginPath();
+                ctx.roundRect(px + player.width - 4, py + 8, 10, 5, 3);
+                ctx.fill();
+            } else {
+                // Cabeza / capucha estilizada
+                ctx.fillStyle = '#f1f5f9';
+                ctx.beginPath();
+                ctx.arc(px + 16, py + 11, 9, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Visor luminoso
+                ctx.fillStyle = '#7dd3fc';
+                ctx.beginPath();
+                ctx.roundRect(px + 18, py + 8, 8, 4, 2);
+                ctx.fill();
+
+                // Torso inclinado hacia adelante
+                ctx.fillStyle = '#cbd5e1';
+                ctx.beginPath();
+                ctx.roundRect(px + 8, py + 20, 15, 19, 6);
+                ctx.fill();
+
+                // Bufanda flotante lavanda/cian
+                const scarfWave = Math.sin(player.runCycle * 1.3) * 4;
+                ctx.strokeStyle = auraColor;
+                ctx.lineWidth = 4;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(px + 12, py + 22);
+                ctx.quadraticCurveTo(px - 4, py + 20 + scarfWave, px - 16, py + 25 - scarfWave);
+                ctx.stroke();
+
+                // Piernas animadas al correr o saltar
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 4.5;
+                ctx.lineCap = 'round';
+                const stride = player.grounded ? Math.sin(player.runCycle) * 9 : 6;
+
+                ctx.beginPath();
+                ctx.moveTo(px + 14, py + 38);
+                ctx.lineTo(px + 14 + stride, py + player.height - 2);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(px + 14, py + 38);
+                ctx.lineTo(px + 14 - stride, py + player.height - 2);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        /* ==========================================================================
+           8. LOOP PRINCIPAL A 60 FPS
+           ========================================================================== */
+        function gameLoop(timestamp) {
+            if (!lastTimestamp) lastTimestamp = timestamp;
+            const dt = Math.min(0.05, (timestamp - lastTimestamp) / 1000);
+            lastTimestamp = timestamp;
+
+            update(dt);
+            render();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        window.onload = function () {
+            initBackdrop();
+            resetWorld();
+            requestAnimationFrame(gameLoop);
+        };
+    </script>
 </body>
 </html>
